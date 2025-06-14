@@ -9,6 +9,11 @@ import com.task.product.constants.ErrorCodes;
 import com.task.product.constants.ResponseStatus;
 import com.task.product.dto.ApiResponse;
 
+/**
+ * @author Athul K S
+ * 
+ * Class to handle Global exceptions
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -20,6 +25,7 @@ public class GlobalExceptionHandler {
             ErrorCodes.PRD_GET_ERR.code,
             HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

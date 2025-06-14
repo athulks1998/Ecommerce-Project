@@ -14,5 +14,6 @@ public record UserRequest(
     String email,
     String firstName,
     String lastName,
-    List<Notification> notifications
+    List<Notification> notifications,
+    String address
 ) {}

@@ -4,17 +4,19 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.task.common.constants.EventType;
+import com.task.common.events.OrderEvent;
 import com.task.product.constants.ErrorCodes;
 import com.task.product.constants.OrderStatus;
 import com.task.product.constants.ResponseStatus;
 import com.task.product.dto.ApiResponse;
 import com.task.product.dto.OrderRequest;
 import com.task.product.dto.OrderResponse;
+import com.task.product.kafka.OrderEventProducer;
 import com.task.product.model.Order;
 import com.task.product.model.OrderItem;
 import com.task.product.model.Product;
@@ -22,6 +24,7 @@ import com.task.product.repository.OrderRepository;
 import com.task.product.repository.ProductRepository;
 
 /**
+ * @author Athul K S
  * Implementation of OrderService for managing order business logic,
  * including stock validation and order status management.
  */
@@ -33,6 +36,9 @@ public class OrderServiceImplementation implements OrderService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderEventProducer orderEventProducer;
 
     /**
      * INFO : Method to place orders
@@ -73,8 +79,17 @@ public class OrderServiceImplementation implements OrderService {
         order.setEstimatedDeliveryDate(LocalDate.now().plusDays(5));
         order.setStatus(OrderStatus.PENDING);
 
-        Order saved = orderRepository.save(order);
-        return new ApiResponse<>(toOrderResponse(saved), ResponseStatus.SUCCESS.value, null, 201);
+        order = orderRepository.save(order);
+
+        //Publish event to request address
+        OrderEvent event = new OrderEvent();
+        event.setEventType(EventType.ORDER_PLACED);
+        event.setOrderId(order.getId());
+        event.setUserId(order.getUserId());
+        orderEventProducer.sendOrderPlacedEvent(event);
+
+        //Return response 
+        return new ApiResponse<>(toOrderResponse(order), ResponseStatus.SUCCESS.value, null, 201);
     }
 
     /**
@@ -114,7 +129,7 @@ public class OrderServiceImplementation implements OrderService {
     @Override
     public ApiResponse<List<OrderResponse>> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserId(userId);
-        List<OrderResponse> responses = orders.stream().map(this::toOrderResponse).collect(Collectors.toList());
+        List<OrderResponse> responses = orders.stream().map(this::toOrderResponse).toList();
         return new ApiResponse<>(responses, ResponseStatus.SUCCESS.value, null, 200);
     }
 
@@ -132,6 +147,15 @@ public class OrderServiceImplementation implements OrderService {
             OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
             order.setStatus(newStatus);
             orderRepository.save(order);
+
+            // Send event to user service
+            OrderEvent event = new OrderEvent();
+            event.setEventType(EventType.ORDER_STATUS_UPDATED);
+            event.setOrderId(order.getId());
+            event.setUserId(order.getUserId());
+            event.setAddress(order.getAddress());
+            orderEventProducer.sendOrderPlacedEvent(event);
+
             return new ApiResponse<>(toOrderResponse(order), ResponseStatus.SUCCESS.value, null, 200);
         } catch (IllegalArgumentException e) {
             return new ApiResponse<>(null, ResponseStatus.FAIL.value, ErrorCodes.ORDER_INVALID_STATUS.code, 400);
@@ -144,7 +168,7 @@ public class OrderServiceImplementation implements OrderService {
     private OrderResponse toOrderResponse(Order order) {
         List<OrderResponse.OrderItemDTO> items = order.getItems().stream()
                 .map(i -> new OrderResponse.OrderItemDTO(i.getProductId(), i.getProductName(), i.getQuantity(), i.getPrice()))
-                .collect(Collectors.toList());
+                .toList();
         return new OrderResponse(
                 order.getId(),
                 order.getUserId(),
@@ -152,7 +176,8 @@ public class OrderServiceImplementation implements OrderService {
                 order.getTotalPrice(),
                 order.getOrderDate(),
                 order.getEstimatedDeliveryDate(),
-                order.getStatus()
+                order.getStatus(),
+                order.getAddress()
         );
     }
 }

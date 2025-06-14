@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.task.user.dto.ApiResponse;
 import com.task.user.dto.UserRequest;
 import com.task.user.dto.UserResponse;
 import com.task.user.model.User;
@@ -29,14 +30,14 @@ public class UserServiceImplementation implements UserService {
      * Registers a new user and saves to database.
      */
     @Override
-    public UserResponse registerUser(UserRequest request) {
+    public ApiResponse<UserResponse> registerUser(UserRequest request) {
         try {
             User user = toUser(request);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             User registeredUser = userRepository.save(user);
-            return toUserResponse(registeredUser, "success", null, 200, null);
+            return new ApiResponse<>(toUserResponse(registeredUser, "success", null, 200, null), "success", null, 200);
         } catch (Exception e) {
-            return new UserResponse(null, null, null, null, null, null, "fail", "USR_REG_ERR", 500, null);
+            return new ApiResponse<>(null, "fail", "USR_REG_ERR", 500);
         }
     }
 
@@ -44,17 +45,20 @@ public class UserServiceImplementation implements UserService {
      * Authenticates a user and returns JWT if valid.
      */
     @Override
-    public UserResponse authenticate(UserRequest request) {
+    public ApiResponse<UserResponse> authenticate(UserRequest request) {
         try {
             User user = userRepository.findByUsername(request.username());
-            if (user != null && passwordEncoder.matches(request.password(), user.getPassword())) {
+            if (user == null) {
+                return new ApiResponse<>(null, "fail", "USR_AUTH_FAIL", 401);
+            }
+            if (passwordEncoder.matches(request.password(), user.getPassword())) {
                 String token = jwtUtil.generateToken(user.getUsername());
-                return toUserResponse(user, "success", null, 200, token);
+                return new ApiResponse<>(toUserResponse(user, "success", null, 200, token), "success", null, 200);
             } else {
-                return new UserResponse(null, null, null, null, null, null, "fail", "USR_AUTH_FAIL", 401, null);
+                return new ApiResponse<>(null, "fail", "USR_AUTH_FAIL", 401);
             }
         } catch (Exception e) {
-            return new UserResponse(null, null, null, null, null, null, "fail", "USR_AUTH_ERR", 500, null);
+            return new ApiResponse<>(null, "fail", "USR_AUTH_ERR", 500);
         }
     }
 
@@ -69,6 +73,7 @@ public class UserServiceImplementation implements UserService {
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setNotifications(request.notifications());
+        user.setAddress(request.address()); 
         return user;
     }
 
@@ -83,6 +88,7 @@ public class UserServiceImplementation implements UserService {
             user != null ? user.getFirstName() : null,
             user != null ? user.getLastName() : null,
             user != null ? user.getNotifications() : null,
+            user != null ? user.getAddress() : null, 
             status,
             errorCode,
             code,

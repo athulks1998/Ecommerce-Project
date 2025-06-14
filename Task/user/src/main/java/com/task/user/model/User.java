@@ -26,5 +26,6 @@ public class User {
     private String email;
     private String firstName;
     private String lastName;
-    private List<Notification> notifications; // New field for notifications
+    private List<Notification> notifications; 
+    private String address;
 }

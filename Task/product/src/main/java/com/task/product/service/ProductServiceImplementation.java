@@ -2,7 +2,6 @@ package com.task.product.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -85,7 +84,7 @@ public class ProductServiceImplementation implements ProductService {
             List<ProductDTO> products = productRepository.findAll()
                     .stream()
                     .map(this::toProductDTO)
-                    .collect(Collectors.toList());
+                    .toList();
             return new ApiResponse<>(products, ResponseStatus.SUCCESS.value, null, 200);
         } catch (Exception e) {
             return new ApiResponse<>(null, ResponseStatus.FAIL.value, ErrorCodes.PRD_LIST_ERR.code, 500);

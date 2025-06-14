@@ -15,6 +15,7 @@ public record UserResponse(
     String firstName,
     String lastName,
     List<Notification> notifications,
+    String address,
     String status,
     String errorCode,
     int code,

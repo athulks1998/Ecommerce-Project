@@ -16,7 +16,8 @@ public record OrderResponse(
     double totalPrice,
     LocalDate orderDate,
     LocalDate estimatedDeliveryDate,
-    OrderStatus status
+    OrderStatus status,
+    String address
 ) {
     /**
      * DTO for individual order item details in the response.

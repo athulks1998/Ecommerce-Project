@@ -31,6 +31,7 @@ public class Order {
     private LocalDate orderDate;
     private LocalDate estimatedDeliveryDate;
     private OrderStatus status;
+    private String address; 
 
 
 }

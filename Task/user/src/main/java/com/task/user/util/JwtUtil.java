@@ -9,10 +9,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+/**
+ * @author Athul K S
+ * JWT util methods 
+ */
 @Component
 public class JwtUtil {
     // Use a secure random key of at least 32 characters for HS256
-    private static final String SECRET_KEY = "my-super-secret-key-which-is-very-long-123456";
+	//Needs to be moved to a common property file
+    private static final String SECRET_KEY = "key-for-product-user-order-management-system-aakshya-123456";
     private static final Key KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
     /**

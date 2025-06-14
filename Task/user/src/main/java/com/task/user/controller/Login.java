@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.task.user.dto.ApiResponse;
 import com.task.user.dto.UserRequest;
 import com.task.user.dto.UserResponse;
 import com.task.user.service.UserService;
@@ -26,8 +27,8 @@ public class Login {
      * Registers a new user.
      */
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest userRequest) {
-        UserResponse response = userService.registerUser(userRequest);
+    public ResponseEntity<ApiResponse<UserResponse>> registerUser(@RequestBody UserRequest userRequest) {
+        ApiResponse<UserResponse> response = userService.registerUser(userRequest);
         return ResponseEntity.status(response.code()).body(response);
     }
 
@@ -35,8 +36,8 @@ public class Login {
      * Authenticates a user and returns JWT.
      */
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> loginUser(@RequestBody UserRequest userRequest) {
-        UserResponse response = userService.authenticate(userRequest);
+    public ResponseEntity<ApiResponse<UserResponse>> loginUser(@RequestBody UserRequest userRequest) {
+        ApiResponse<UserResponse> response = userService.authenticate(userRequest);
         return ResponseEntity.status(response.code()).body(response);
     }
 }

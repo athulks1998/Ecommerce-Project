@@ -24,8 +24,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    // Use the same secret as in user service!
-    private static final String SECRET_KEY = "my-super-secret-key-which-is-very-long-123456";
+	//Needs to be moved to a common property file
+    private static final String SECRET_KEY = "key-for-product-user-order-management-system-aakshya-123456";
     private static final Key KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
     /**

@@ -1,5 +1,6 @@
 package com.task.user.service;
 
+import com.task.user.dto.ApiResponse;
 import com.task.user.dto.UserRequest;
 import com.task.user.dto.UserResponse;
 
@@ -14,12 +15,12 @@ public interface UserService {
      * @param request user registration data
      * @return user response
      */
-    UserResponse registerUser(UserRequest request);
+    ApiResponse<UserResponse> registerUser(UserRequest request);
 
     /**
      * Authenticates a user and returns a JWT if successful.
      * @param request user login data
      * @return user response
      */
-    UserResponse authenticate(UserRequest request);
+    ApiResponse<UserResponse> authenticate(UserRequest request);
 }
